@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Tuple
 
@@ -43,18 +42,19 @@ class AppConfig(BaseModel, extra="ignore"):
         return self
 
 
-def get_configs() -> Tuple[AppConfig, ScenarioConfig]:
-    """Read and parse configuration file at CONFIG_PATH into file configuration
+def get_configs(config_path: Path) -> Tuple[AppConfig, ScenarioConfig]:
+    """_summary_
+
+    Args:
+        config_path (str): _description_
 
     Raises:
-        ValueError: raised if CONFIG_PATH is not set, or does not point to a correct file
+        ValueError: _description_
 
     Returns:
-        Tuple[AppConfig, ScenarioConfig]: the configurations
+        Tuple[AppConfig, ScenarioConfig]: _description_
     """
-    config_path = os.getenv("CONFIG_PATH")
-    if not config_path:
-        raise ValueError("CONFIG_PATH env value should be set to config path")
-    path = Path(config_path)
-    json_config = read_json(path)
-    return AppConfig(**json_config, config_path=path), ScenarioConfig(**json_config)
+    json_config = read_json(config_path)
+    return AppConfig(**json_config, config_path=config_path), ScenarioConfig(
+        **json_config
+    )

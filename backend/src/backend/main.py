@@ -1,4 +1,5 @@
 import logging.config
+import os
 from logging import getLogger
 from pathlib import Path
 from typing import Dict
@@ -43,8 +44,13 @@ def setup_log_config():
 def setup_config():
     """Setup configuration singletons."""
     LOGGER.info("Loading config ...")
+    config_path_str = os.getenv("CONFIG_PATH")
+    if not config_path_str:
+        raise ValueError("CONFIG_PATH env value should be set to config path")
+    config_path = Path(config_path_str)
+
     global APP_CONFIG, SCENARIO_CONFIG
-    APP_CONFIG, SCENARIO_CONFIG = get_configs()
+    APP_CONFIG, SCENARIO_CONFIG = get_configs(config_path)
     LOGGER.info("Config loaded.")
 
 

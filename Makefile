@@ -28,6 +28,10 @@ backend: _build ## Open a bash inside the backend container
 	docker compose run --rm ${SVC_BACKEND} poetry shell
 .PHONY: bash_backend
 
+cli: _build ## Launch the cli of the backend
+	docker compose run --rm ${SVC_BACKEND} poetry run python ./src/backend/cli.py ${args}
+.PHONY: cli
+
 setup: _build ## Build and install the dependencies
 	docker compose run --rm ${SVC_BACKEND} poetry install --sync
 .PHONY: setup
