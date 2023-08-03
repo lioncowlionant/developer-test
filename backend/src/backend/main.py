@@ -4,14 +4,14 @@ from logging import getLogger
 from pathlib import Path
 from typing import Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
 from starlette.middleware.cors import CORSMiddleware
 
 from backend.config import ScenarioConfig, get_configs
 from backend.data_contract import Scenario
 from backend.db import load_routes
 from backend.odds import compute_odds
-from backend.utils import read_json
+from backend.utils import read_json, read_json_file
 
 LOGGER = getLogger(__name__)
 
@@ -93,6 +93,22 @@ async def odds(scenario: Scenario) -> float:
     Returns:
         float: the odds of managing to reach destination
     """
+    return compute_odds(
+        routes=ROUTES, scenario_config=SCENARIO_CONFIG, scenario=scenario
+    )
+
+
+@fastapi_app.post("/odds_file")
+async def odds_from_file(scenario_file: UploadFile) -> float:
+    """Compute the maximum odds for the given scenario
+
+    Args:
+        scenario (UploadFile): the scenario uploaded as a file
+
+    Returns:
+        float: the odds of managing to reach destination
+    """
+    scenario = Scenario(**await read_json_file(scenario_file))
     return compute_odds(
         routes=ROUTES, scenario_config=SCENARIO_CONFIG, scenario=scenario
     )
