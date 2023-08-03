@@ -20,7 +20,7 @@ def nb_encounter_to_odds(nb_encounter: int) -> float:
     """
     # The mathematical formula to compute the total probability of being captured is:
     # 1/10 + 9/10^2 + 9^2/10^3 + ... 9^k/10^(k+1)
-    return sum((9 ^ k) / (10 ^ (k + 1)) for k in range(0, nb_encounter, 1))
+    return 1 - sum((9**k) / (10 ** (k + 1)) for k in range(0, nb_encounter))
 
 
 @dataclass(frozen=True)
@@ -84,11 +84,14 @@ class Itinerary:
         Returns:
             int: the minimum number of encounters
         """
+        LOGGER.debug("Optimizing %s", self.stages)
         stack = [(0, 0, autonomy, 0)]
         bh_positions = scenario.view
         min_encounter = math.inf
         # Let's brute force for each solution, and keep best one
         while len(stack) > 0:
+            LOGGER.debug("Stack length %s", len(stack))
+            LOGGER.debug(stack)
             nb_stage, nb_encounter, leftover, cost = stack.pop()
             current_planet = self.stages[nb_stage].planet
             # Let's check for bounty hunters
@@ -96,9 +99,11 @@ class Itinerary:
                 nb_encounter += 1
             # Ignore inefficient solution
             if cost > scenario.countdown:
+                LOGGER.debug("Skipping one")
                 continue
             # If we finished the travel, check the number of encounters
             if nb_stage == len(self.stages) - 1:
+                LOGGER.debug("Updating min encounter %s", nb_encounter)
                 min_encounter = min(min_encounter, nb_encounter)
                 # We found optimal solution, we can stop
                 if min_encounter == 0:
@@ -107,13 +112,11 @@ class Itinerary:
                 continue
             # Else, we need to continue the travel
             # We know solution is possible, so
-            # - add a solution with a refuel
-            next_stage = self.stages[nb_stage + 1]
-            stack.append(
-                (nb_stage + 1, nb_encounter, autonomy, cost + 1 + next_stage.cost)
-            )
+            # - stay at position and refuel
+            stack.append((nb_stage, nb_encounter, autonomy, cost + 1))
             # - try to go without refuel
-            if next_stage.cost < leftover:
+            next_stage = self.stages[nb_stage + 1]
+            if next_stage.cost <= leftover:
                 stack.append(
                     (
                         nb_stage + 1,
@@ -172,13 +175,13 @@ def compute_odds(
             continue
 
         # Else let's go to other planets
-        discovered = [s.planet for s in current.stages]
+        # discovered = [s.planet for s in current.stages]
         for next_hop, cost in routes[current.last_planet].items():
             # Let's ensure we do no go twice to the same planet
             # NOTES(Bazire): Arguably, this could be needed to "dodge" bounty hunter in some cases
             # Should I remove it ?
-            if next_hop in discovered:
-                continue
+            # if next_hop in discovered:
+            #     continue
             new_stages = list(current.stages) + [Stage(next_hop, cost)]
             stack.append(Itinerary(new_stages))
 
@@ -191,6 +194,6 @@ def compute_odds(
     solutions.sort(key=lambda t: t[0])
     min_encounter, solution = solutions[0]
     odds = nb_encounter_to_odds(min_encounter)
-    LOGGER.debug("Solution found with %s encounter, so % odds", min_encounter, odds)
+    LOGGER.debug("Solution found with %s encounter, so %.4f odds", min_encounter, odds)
     LOGGER.debug(solution)
     return odds

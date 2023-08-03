@@ -9,4 +9,4 @@ def test_cli(scenario_paths: ExampleFolderStructure):
     odds = what_are_the_odds(scenario_paths.config_path, scenario_paths.scenario_path)
     print(odds)
     print(answer)
-    assert (odds - answer) < 1e-2
+    assert odds == answer
