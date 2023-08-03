@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Hartorn <hartorn.github@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "backend", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.100.1"
+uvicorn = { extras = ["standard"], version = "^0.23.2" }
+typer = "^0.9.0"
+rich = "^13.5.2"
+pydantic = "^2.1.1"
+aiosqlite = "^0.19.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+isort = "^5.12.0"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.1"
+pylint = { extras = ["spelling"], version = "^2.17.5" }
+pylint-pydantic = "^0.2.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+extend_skip_glob = [".history/*"]
+
+[tool.pylint.master]
+extension-pkg-whitelist = "pydantic"
+load-plugins = ["pylint_pydantic"]
+fail-under = "9.83"
+
+[tool.pylint.reports]
+reports = "y"
+output-format = "colorized"
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "missing-module-docstring,fixme,too-few-public-methods"
+generated-members = ["cv2"]
+
+[tool.pylint.spelling]
+spelling-dict = "en_US"
+spelling-private-dict-file = "pylint_allowed_words.txt"

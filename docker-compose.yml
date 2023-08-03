@@ -1,0 +1,25 @@
+#https://docs.docker.com/compose/compose-file/
+services:
+  backend:
+    build:
+      context: ./backend
+      target: dev
+      args:
+        - USERNAME=${USERNAME}
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+        - HOME_DIR=${HOME_DIR}
+    environment:
+      - CONFIG_PATH=/data/examples/example1/millennium-falcon.json
+    command: poetry run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+    ports:
+      - 8000:8000
+    networks:
+      - odds
+    volumes:
+      - ./original/examples:/data/examples:ro
+      - ./backend:/work/backend
+    working_dir: /work/backend
+networks:
+  odds:
+    driver: bridge
