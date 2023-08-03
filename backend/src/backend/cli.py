@@ -36,7 +36,7 @@ def what_are_the_odds(
     odds = compute_odds(
         routes=routes, scenario_config=scenario_config, scenario=scenario
     )
-    print(odds)
+    print(int(odds *100))
     return odds
 
 
